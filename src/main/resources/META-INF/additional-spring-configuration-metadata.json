@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "cloud.notification.service.url",
+  "type": "java.lang.String",
+  "description": "The url where you can access the notification service"
+}]}

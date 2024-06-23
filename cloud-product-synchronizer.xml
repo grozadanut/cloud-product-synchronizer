@@ -1,0 +1,9 @@
+<service>
+    <id>cloud-product-synchronizer</id>
+    <name>Cloud Product Synchronizer</name>
+    <description>Synchronizes products between Woocommerce and Linic Platform</description>
+    <env name="CLOUD_PRODUCT_SYNCHRONIZER_HOME" value="%BASE%"/>
+    <executable>java</executable>
+    <arguments>-Xmx256m -jar "%BASE%\cloud-product-synchronizer.jar"</arguments>
+    <logmode>rotate</logmode>
+</service>
