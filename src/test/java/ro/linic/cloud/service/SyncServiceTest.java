@@ -128,7 +128,7 @@ public class SyncServiceTest {
 	}
 	
 	@Test
-	public void givenWooReturnsErrorCode_whenCreateProductCalled_thenThrowException() {
+	public void givenWooReturnsErrorCode_whenCreateProductCalled_thenReturnAccepted() {
 		// given
 		final CreateProductCommand command = new CreateProductCommand(companyId, 22, "59", "cement 40kg", "buc", new BigDecimal("29.5"));
 		final Product commandProd = Product.builder()
@@ -142,10 +142,11 @@ public class SyncServiceTest {
 		.thenReturn(new ResponseEntity<Product>(HttpStatus.BAD_REQUEST));
 		
 		// when
+		final ResponseEntity<Product> result = syncService.createProduct(command);
+		
 		// then
-		assertThatThrownBy(() -> syncService.createProduct(command))
-		.isInstanceOf(RuntimeException.class)
-		.hasMessage("Woocommerce status code "+HttpStatus.BAD_REQUEST);
+		assertThat(result.getBody()).isNull();
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
 	}
 	
 	@Test

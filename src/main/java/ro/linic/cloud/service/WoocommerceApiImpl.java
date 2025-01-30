@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -65,9 +66,16 @@ public class WoocommerceApiImpl implements WoocommerceApi {
 				"backorders", "notify");
 		final Map<String, Map<String, Object>> jsonWrapper = Map.of("product", jsonMap);
 		
-		return unwrap(restTemplate.exchange(syncConnection.getWebsiteUrl()+WOO_PRODUCTS_SUFFIX,
-				HttpMethod.POST, new HttpEntity<Map<String, Map<String, Object>>>(jsonWrapper, headers),
-				new ParameterizedTypeReference<ProductWrapper>(){}));
+		try {
+			final ResponseEntity<ProductWrapper> response = restTemplate.exchange(syncConnection.getWebsiteUrl()+WOO_PRODUCTS_SUFFIX,
+					HttpMethod.POST, new HttpEntity<Map<String, Map<String, Object>>>(jsonWrapper, headers),
+					new ParameterizedTypeReference<ProductWrapper>(){});
+			return unwrap(response);
+		} catch (final Exception e) {
+			log.severe("Failed createProduct WOO invocation "+jsonMap+" for: "+wooProduct);
+			log.log(Level.SEVERE, e.getMessage(), e);
+			return ResponseEntity.internalServerError().build();
+		}
 	}
 	
 	@Override
@@ -81,9 +89,16 @@ public class WoocommerceApiImpl implements WoocommerceApi {
 		jsonMap.put(Product.WOO_STOCK_KEY, wooProduct.getStock());
 		final Map<String, Map<String, Object>> jsonWrapper = Map.of("product", jsonMap);
 		
-		return unwrap(restTemplate.exchange(syncConnection.getWebsiteUrl()+WOO_PRODUCTS_SUFFIX+"/"+wooProduct.getId(),
-				HttpMethod.PUT, new HttpEntity<Map<String, Map<String, Object>>>(jsonWrapper, headers),
-				new ParameterizedTypeReference<ProductWrapper>(){}));
+		try {
+			final ResponseEntity<ProductWrapper> response = restTemplate.exchange(syncConnection.getWebsiteUrl()+WOO_PRODUCTS_SUFFIX+"/"+wooProduct.getId(),
+					HttpMethod.PUT, new HttpEntity<Map<String, Map<String, Object>>>(jsonWrapper, headers),
+					new ParameterizedTypeReference<ProductWrapper>(){});
+			return unwrap(response);
+		} catch (final Exception e) {
+			log.severe("Failed putProduct WOO invocation "+jsonMap+" for: "+wooProduct);
+			log.log(Level.SEVERE, e.getMessage(), e);
+			return ResponseEntity.internalServerError().build();
+		}
 	}
 	
 	@Override
@@ -101,9 +116,16 @@ public class WoocommerceApiImpl implements WoocommerceApi {
 			jsonMap.put(Product.WOO_STOCK_KEY, wooProduct.getStock());
 		final Map<String, Map<String, Object>> jsonWrapper = Map.of("product", jsonMap);
 		
-		return unwrap(restTemplate.exchange(syncConnection.getWebsiteUrl()+WOO_PRODUCTS_SUFFIX+"/"+wooProduct.getId(),
-				HttpMethod.PUT, new HttpEntity<Map<String, Map<String, Object>>>(jsonWrapper, headers),
-				new ParameterizedTypeReference<ProductWrapper>(){}));
+		try {
+			final ResponseEntity<ProductWrapper> response = restTemplate.exchange(syncConnection.getWebsiteUrl()+WOO_PRODUCTS_SUFFIX+"/"+wooProduct.getId(),
+					HttpMethod.PUT, new HttpEntity<Map<String, Map<String, Object>>>(jsonWrapper, headers),
+					new ParameterizedTypeReference<ProductWrapper>(){});
+			return unwrap(response);
+		} catch (final Exception e) {
+			log.severe("Failed patchProduct WOO invocation "+jsonMap+" for: "+wooProduct);
+			log.log(Level.SEVERE, e.getMessage(), e);
+			return ResponseEntity.internalServerError().build();
+		}
 	}
 	
 	@Override
@@ -113,9 +135,16 @@ public class WoocommerceApiImpl implements WoocommerceApi {
 		final Map<String, Object> jsonMap = Map.of("catalog_visibility", "hidden");
 		final Map<String, Map<String, Object>> jsonWrapper = Map.of("product", jsonMap);
 		
-		return unwrap(restTemplate.exchange(syncConnection.getWebsiteUrl()+WOO_PRODUCTS_SUFFIX+"/"+wooId,
-				HttpMethod.PUT, new HttpEntity<Map<String, Map<String, Object>>>(jsonWrapper, headers),
-				new ParameterizedTypeReference<ProductWrapper>(){}));
+		try {
+			final ResponseEntity<ProductWrapper> response = restTemplate.exchange(syncConnection.getWebsiteUrl()+WOO_PRODUCTS_SUFFIX+"/"+wooId,
+					HttpMethod.PUT, new HttpEntity<Map<String, Map<String, Object>>>(jsonWrapper, headers),
+					new ParameterizedTypeReference<ProductWrapper>(){});
+			return unwrap(response);
+		} catch (final Exception e) {
+			log.severe("Failed deactivateProduct WOO invocation "+jsonMap+" for: "+wooId);
+			log.log(Level.SEVERE, e.getMessage(), e);
+			return ResponseEntity.internalServerError().build();
+		}
 	}
 	
 	private ResponseEntity<Product> unwrap(final ResponseEntity<ProductWrapper> response) {

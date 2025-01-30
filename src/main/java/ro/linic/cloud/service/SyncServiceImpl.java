@@ -195,7 +195,8 @@ class SyncServiceImpl implements SyncService {
 				new Product(null, null, command.getBarcode(), command.getName(), command.getUom(), command.getPricePerUom(), null, null));
 
 		if (!wooReponse.getStatusCode().is2xxSuccessful())
-			throw new RuntimeException("Woocommerce status code "+wooReponse.getStatusCode());
+			return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
+//			throw new RuntimeException("Woocommerce status code "+wooReponse.getStatusCode());
 
 		final Product wooProduct = wooReponse.getBody();
 		final SyncLine syncLine = new SyncLine(null, syncConnection.get(), command.getProductId(), wooProduct.getId(), null);
