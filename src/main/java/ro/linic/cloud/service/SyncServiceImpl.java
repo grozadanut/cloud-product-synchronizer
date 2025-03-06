@@ -6,27 +6,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.Traverson;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.java.Log;
 import ro.linic.cloud.command.ChangeNameCommand;
 import ro.linic.cloud.command.ChangePriceCommand;
 import ro.linic.cloud.command.ChangeStockCommand;
-import ro.linic.cloud.command.CreateNotificationCommand;
 import ro.linic.cloud.command.CreateProductCommand;
 import ro.linic.cloud.command.DeleteProductCommand;
 import ro.linic.cloud.entity.SyncConnection;
@@ -38,14 +33,9 @@ import ro.linic.cloud.repository.SyncProductRepository;
 @Log
 @Service
 class SyncServiceImpl implements SyncService {
-
-	@Autowired private WoocommerceApi woocommerceApi;
-	@Autowired private SyncConnectionRepository syncConnRepo;
+	@Autowired private WoocommerceService woocommerceService;
 	@Autowired private SyncProductRepository syncProductRepo;
-	@Autowired private RestTemplate restTemplate;
-	
-	@Value("${cloud.notification.service.url:http://localhost}")
-	private String notificationServiceUrl;
+	@Autowired private SyncConnectionRepository syncConnRepo;
 	
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
@@ -54,7 +44,7 @@ class SyncServiceImpl implements SyncService {
 			throw new RuntimeException("SyncConnection already exists for company id: "+syncConnection.getCompanyId());
 		
 		final SyncConnection savedConn = syncConnRepo.save(syncConnection);
-		final List<Product> wooProducts = woocommerceApi.allProducts(savedConn);
+		final List<Product> wooProducts = woocommerceService.allProducts(savedConn);
 		final int companyId = savedConn.getCompanyId();
 		
 		final StringBuilder sb = new StringBuilder();
@@ -83,7 +73,7 @@ class SyncServiceImpl implements SyncService {
 			{
 				if (wooProd.getVisible())
 				{
-					woocommerceApi.deactivateProduct(syncConnection, wooProd.getId());
+					woocommerceService.deactivateProduct(syncConnection, wooProd.getId());
 					sb.append(System.lineSeparator())
 					.append(MessageFormat.format("Deactivating Woo SKU {0}: {1}", wooProd.getBarcode(), wooProd.getName(),
 							deactivated.incrementAndGet()));
@@ -129,7 +119,7 @@ class SyncServiceImpl implements SyncService {
 			
 			// update WOO
 			if (triggerUpdate)
-				woocommerceApi.putProduct(syncConnection, wooProd);
+				woocommerceService.putProduct(syncConnection, wooProd);
 			
 			// create sync connections
 			final List<SyncLine> foundSyncLine = syncProductRepo.findBySyncConnectionIdAndProductIdAndWooId(savedConn.getId(),
@@ -182,125 +172,61 @@ class SyncServiceImpl implements SyncService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public ResponseEntity<Product> createProduct(final CreateProductCommand command) {
-		final Optional<SyncConnection> syncConnection = syncConnRepo.findByCompanyId(command.getCompanyId());
+		try {
+			return woocommerceService.createProduct(command);
+		} catch (final Exception e) {
+			log.log(Level.SEVERE, e.getMessage(), e);
+		}
 		
-		if (syncConnection.isEmpty())
-			return new ResponseEntity<>(HttpStatus.OK);
-		
-		final Optional<SyncLine> foundSyncLine = syncProductRepo.findBySyncConnectionIdAndProductId(syncConnection.get().getId(), command.getProductId());
-		if (foundSyncLine.isPresent())
-			throw new RuntimeException("Sync product line already exists: "+foundSyncLine.get());
-
-		final ResponseEntity<Product> wooReponse = woocommerceApi.createProduct(syncConnection.get(),
-				new Product(null, null, command.getBarcode(), command.getName(), command.getUom(), command.getPricePerUom(), null, null));
-
-		if (!wooReponse.getStatusCode().is2xxSuccessful())
-			return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
-//			throw new RuntimeException("Woocommerce status code "+wooReponse.getStatusCode());
-
-		final Product wooProduct = wooReponse.getBody();
-		final SyncLine syncLine = new SyncLine(null, syncConnection.get(), command.getProductId(), wooProduct.getId(), null);
-		syncProductRepo.save(syncLine);
-		notifyProductCreate(syncConnection.get(), wooProduct);
-		return new ResponseEntity<>(wooProduct, HttpStatus.OK);
+		return null;
 	}
 
 	@Override
 	public ResponseEntity<Product> updatePrice(final ChangePriceCommand changePriceCommand) {
-		if (!productIsSynced(changePriceCommand.getCompanyId(), changePriceCommand.getProductId()))
-			return new ResponseEntity<>(HttpStatus.OK);
+		try {
+			return woocommerceService.updatePrice(changePriceCommand);
+		} catch (final Exception e) {
+			log.log(Level.SEVERE, e.getMessage(), e);
+		}
 		
-		final Optional<SyncConnection> syncConnection = syncConnRepo.findByCompanyId(changePriceCommand.getCompanyId());
-		final Optional<SyncLine> syncLine = syncProductRepo.findBySyncConnectionIdAndProductId(syncConnection.get().getId(),
-				changePriceCommand.getProductId());
-		final Product wooProduct = Product.builder()
-				.id(syncLine.get().getWooId())
-				.pricePerUom(changePriceCommand.getPricePerUom())
-				.build();
-		return woocommerceApi.patchProduct(syncConnection.get(), wooProduct);
+		return null;
 	}
 	
 	@Override
 	public ResponseEntity<Product> updateStock(final ChangeStockCommand changeStockCommand) {
-		if (!productIsSynced(changeStockCommand.getCompanyId(), changeStockCommand.getProductId()))
-			return new ResponseEntity<>(HttpStatus.OK);
+		try {
+			return woocommerceService.updateStock(changeStockCommand);
+		} catch (final Exception e) {
+			log.log(Level.SEVERE, e.getMessage(), e);
+		}
 		
-		final Optional<SyncConnection> syncConnection = syncConnRepo.findByCompanyId(changeStockCommand.getCompanyId());
-		final Optional<SyncLine> syncProduct = syncProductRepo.findBySyncConnectionIdAndProductId(syncConnection.get().getId(),
-				changeStockCommand.getProductId());
-		final Product wooProduct = Product.builder()
-				.id(syncProduct.get().getWooId())
-				.stock(changeStockCommand.getStock())
-				.build();
-		return woocommerceApi.patchProduct(syncConnection.get(), wooProduct);
+		return null;
+	}
+	
+	@Override
+	public ResponseEntity<Product> updateName(final ChangeNameCommand command) {
+		try {
+			return woocommerceService.updateName(command);
+		} catch (final Exception e) {
+			log.log(Level.SEVERE, e.getMessage(), e);
+		}
+		
+		return null;
 	}
 	
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public ResponseEntity<Product> deleteProduct(final DeleteProductCommand command) {
-		if (!productIsSynced(command.getCompanyId(), command.getProductId()))
-			return new ResponseEntity<>(HttpStatus.OK);
+		try {
+			return woocommerceService.deleteProduct(command);
+		} catch (final Exception e) {
+			log.log(Level.SEVERE, e.getMessage(), e);
+		}
 		
-		final Optional<SyncConnection> syncConnection = syncConnRepo.findByCompanyId(command.getCompanyId());
-		final Optional<SyncLine> syncProduct = syncProductRepo.findBySyncConnectionIdAndProductId(syncConnection.get().getId(),
-				command.getProductId());
-		syncProductRepo.delete(syncProduct.get());
-		return woocommerceApi.deactivateProduct(syncConnection.get(), syncProduct.get().getWooId());
-	}
-	
-	@Override
-	public ResponseEntity<Product> updateName(final ChangeNameCommand command) {
-		if (!productIsSynced(command.getCompanyId(), command.getProductId()))
-			return new ResponseEntity<>(HttpStatus.OK);
-		
-		final Optional<SyncConnection> syncConnection = syncConnRepo.findByCompanyId(command.getCompanyId());
-		final Optional<SyncLine> syncLine = syncProductRepo.findBySyncConnectionIdAndProductId(syncConnection.get().getId(), command.getProductId());
-		notifyNameChange(syncConnection.get(), syncLine.get(), command);
-		return new ResponseEntity<>(HttpStatus.OK);
+		return null;
 	}
 
-	private boolean productIsSynced(final Integer companyId, final Integer productId) {
-		final Optional<SyncConnection> syncConnection = syncConnRepo.findByCompanyId(companyId);
-		
-		if (syncConnection.isEmpty())
-			return false;
-		
-		return syncProductRepo.findBySyncConnectionIdAndProductId(syncConnection.get().getId(), productId)
-				.isPresent();
-	}
-	
-	protected Traverson createTraverson(final String url)
-	{
+	protected Traverson createTraverson(final String url) {
 		return new Traverson(URI.create(url), MediaTypes.HAL_JSON);
-	}
-	
-	private void notifyProductCreate(final SyncConnection connection,  final Product wooProduct) {
-		final StringBuilder sb = new StringBuilder();
-		
-		sb.append("Produs adaugat pe woocommerce").append(System.lineSeparator())
-		.append("ID: "+wooProduct.getId()).append(System.lineSeparator())
-		.append("Cod: "+wooProduct.getBarcode()).append(System.lineSeparator())
-		.append("Nume: "+wooProduct.getName()).append(System.lineSeparator())
-		.append("Pret: "+wooProduct.getPricePerUom()).append(System.lineSeparator())
-		.append(MessageFormat.format("Acceseaza {0} pentru a edita", connection.getWebsiteUrl()));
-		
-		restTemplate.exchange(notificationServiceUrl+"/notification", HttpMethod.POST,
-				new HttpEntity<CreateNotificationCommand>(new CreateNotificationCommand(connection.getCompanyId(), sb.toString())),
-				Void.class);
-	}
-	
-	private void notifyNameChange(final SyncConnection connection, final SyncLine syncLine, final ChangeNameCommand command) {
-		final StringBuilder sb = new StringBuilder();
-		
-		sb.append("Numele produsului a fost modificat").append(System.lineSeparator())
-		.append("ID: "+command.getProductId()).append(System.lineSeparator())
-		.append("Woo ID: "+syncLine.getWooId()).append(System.lineSeparator())
-		.append("Cod: "+command.getBarcode()).append(System.lineSeparator())
-		.append("Nume nou: "+command.getName()).append(System.lineSeparator())
-		.append(MessageFormat.format("Acceseaza {0} pentru a edita", connection.getWebsiteUrl()));
-		
-		restTemplate.exchange(notificationServiceUrl+"/notification", HttpMethod.POST,
-				new HttpEntity<CreateNotificationCommand>(new CreateNotificationCommand(connection.getCompanyId(), sb.toString())),
-				Void.class);
 	}
 }
