@@ -8,7 +8,6 @@ import ro.linic.cloud.entity.SyncConnection;
 import ro.linic.cloud.pojo.Product;
 
 public interface WoocommerceApi {
-
 	List<Product> allProducts(SyncConnection syncConnection);
 	ResponseEntity<Product> createProduct(SyncConnection syncConnection, Product wooProduct);
 	ResponseEntity<Product> putProduct(SyncConnection syncConnection, Product wooProduct);

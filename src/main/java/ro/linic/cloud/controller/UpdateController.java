@@ -22,17 +22,17 @@ public class UpdateController {
 	@Autowired private SyncService syncService;
 
 	@PostMapping("/createProduct")
-    public ResponseEntity<Product> createProduct(@RequestBody final CreateProductCommand command) {
+    public ResponseEntity<String> createProduct(@RequestBody final CreateProductCommand command) {
         return syncService.createProduct(command);
     }
 
 	@PostMapping("/deleteProduct")
-    public ResponseEntity<Product> deleteProduct(@RequestBody final DeleteProductCommand command) {
+    public ResponseEntity<String> deleteProduct(@RequestBody final DeleteProductCommand command) {
         return syncService.deleteProduct(command);
     }
 	
 	@PostMapping("/price")
-    public ResponseEntity<Product> updatePrice(@RequestBody final ChangePriceCommand command) {
+    public ResponseEntity<String> updatePrice(@RequestBody final ChangePriceCommand command) {
         return syncService.updatePrice(command);
     }
 	
@@ -42,7 +42,7 @@ public class UpdateController {
     }
 	
 	@PostMapping("/name")
-    public ResponseEntity<Product> updateName(@RequestBody final ChangeNameCommand command) {
+    public ResponseEntity<String> updateName(@RequestBody final ChangeNameCommand command) {
         return syncService.updateName(command);
     }
 }

@@ -38,7 +38,7 @@ public class WoocommerceApiTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void givenRestTemplateIsMocked_whenAllProductsIsCalled_thenReturnsProductsFromAllPages() {
+	public void allProducts_whenRestTemplateIsMocked_returnsProductsFromAllPages() {
 		// given
 		final SyncConnection conn = new SyncConnection();
 		conn.setWebsiteUrl("https://woo.com");
@@ -76,7 +76,7 @@ public class WoocommerceApiTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void givenRestTemplateIsMocked_whenAllProductsIsCalled_thenAuthHeaderShouldBeSet() {
+	public void allProducts_whenRestTemplateIsMocked_authHeaderShouldBeSet() {
 		// given
 		final SyncConnection conn = new SyncConnection();
 		conn.setWebsiteUrl("https://woo.com");

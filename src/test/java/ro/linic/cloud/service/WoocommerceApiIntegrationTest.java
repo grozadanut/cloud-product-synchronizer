@@ -44,7 +44,7 @@ public class WoocommerceApiIntegrationTest {
     }
     
     @Test
-	public void givenWebsiteIsMocked_whenAllProductsIsCalled_thenParsesJsonAndReturnsAllWooProducts() throws URISyntaxException {
+	public void allProducts_whenWebsiteIsMocked_parsesJsonAndReturnsAllWooProducts() throws URISyntaxException {
 		// given
 		final SyncConnection conn = new SyncConnection();
 		conn.setWebsiteUrl("https://woo.com");
@@ -185,7 +185,7 @@ public class WoocommerceApiIntegrationTest {
 	}
     
     @Test
-	public void givenProductIsNull_whenCreateProductIsCalled_thenThrowNPE() {
+	public void createProduct_whenProductIsNull_throwNPE() {
     	final SyncConnection conn = new SyncConnection();
 		conn.setWebsiteUrl("https://woo.com");
 		
@@ -193,7 +193,7 @@ public class WoocommerceApiIntegrationTest {
     }
     
     @Test
-   	public void givenWebsiteIsMocked_whenCreateProductIsCalled_thenReturnCreatedWooProduct() throws URISyntaxException {
+   	public void createProduct_whenWebsiteIsMocked_returnCreatedWooProduct() throws URISyntaxException {
     	// given
        	final SyncConnection conn = new SyncConnection();
    		conn.setWebsiteUrl("https://woo.com");
@@ -248,7 +248,7 @@ public class WoocommerceApiIntegrationTest {
     }
     
     @Test
-   	public void givenProductExists_whenPutProductIsCalled_thenOverrideAllProductFields() throws URISyntaxException {
+   	public void putProduct_whenProductExists_overrideAllProductFields() throws URISyntaxException {
     	// given
        	final SyncConnection conn = new SyncConnection();
    		conn.setWebsiteUrl("https://woo.com");
@@ -300,7 +300,7 @@ public class WoocommerceApiIntegrationTest {
     }
     
     @Test
-   	public void givenProductExists_whenPatchProductIsCalled_thenOverrideNonNullFields() throws URISyntaxException {
+   	public void patchProduct_whenProductExists_overrideNonNullFields() throws URISyntaxException {
     	// given
        	final SyncConnection conn = new SyncConnection();
    		conn.setWebsiteUrl("https://woo.com");
@@ -349,7 +349,7 @@ public class WoocommerceApiIntegrationTest {
     }
     
     @Test
-   	public void givenProductExists_whenDeactivateProductIsCalled_thenHideWooProduct() throws URISyntaxException {
+   	public void deactivateProduct_whenProductExists_hideWooProduct() throws URISyntaxException {
     	// given
        	final SyncConnection conn = new SyncConnection();
    		conn.setWebsiteUrl("https://woo.com");

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>ro.linic.cloud</groupId>
 	<artifactId>cloud-product-synchronizer</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>cloud-product-synchronizer</name>
 	<description>Synchronizes products between Woocommerce, Linic Platform...</description>
 	<properties>

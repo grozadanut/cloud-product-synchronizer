@@ -15,11 +15,11 @@ public interface SyncService {
 	Object createConnection(SyncConnection syncConnection);
 	void deleteConnection(Integer syncConnectionId);
 	Iterable<SyncConnection> findAll();
-	ResponseEntity<Product> updatePrice(ChangePriceCommand command);
+	ResponseEntity<String> updatePrice(ChangePriceCommand command);
 	ResponseEntity<Product> updateStock(ChangeStockCommand command);
 	Object updateConnection(Integer syncConnectionId, String inventoryServiceUrl, String websiteUrl, String key,
 			String secret);
-	ResponseEntity<Product> createProduct(CreateProductCommand command);
-	ResponseEntity<Product> deleteProduct(DeleteProductCommand command);
-	ResponseEntity<Product> updateName(ChangeNameCommand command);
+	ResponseEntity<String> createProduct(CreateProductCommand command);
+	ResponseEntity<String> deleteProduct(DeleteProductCommand command);
+	ResponseEntity<String> updateName(ChangeNameCommand command);
 }

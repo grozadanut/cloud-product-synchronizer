@@ -34,6 +34,7 @@ import ro.linic.cloud.repository.SyncProductRepository;
 @Service
 class SyncServiceImpl implements SyncService {
 	@Autowired private WoocommerceService woocommerceService;
+	@Autowired private MoquiApi moquiApi;
 	@Autowired private SyncProductRepository syncProductRepo;
 	@Autowired private SyncConnectionRepository syncConnRepo;
 	
@@ -171,25 +172,25 @@ class SyncServiceImpl implements SyncService {
 	
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public ResponseEntity<Product> createProduct(final CreateProductCommand command) {
+	public ResponseEntity<String> createProduct(final CreateProductCommand command) {
 		try {
-			return woocommerceService.createProduct(command);
+			woocommerceService.createProduct(command);
 		} catch (final Exception e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 		}
 		
-		return null;
+		return moquiApi.createProduct(command);
 	}
 
 	@Override
-	public ResponseEntity<Product> updatePrice(final ChangePriceCommand changePriceCommand) {
+	public ResponseEntity<String> updatePrice(final ChangePriceCommand changePriceCommand) {
 		try {
-			return woocommerceService.updatePrice(changePriceCommand);
+			woocommerceService.updatePrice(changePriceCommand);
 		} catch (final Exception e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 		}
 		
-		return null;
+		return moquiApi.updatePrice(changePriceCommand);
 	}
 	
 	@Override
@@ -200,30 +201,30 @@ class SyncServiceImpl implements SyncService {
 			log.log(Level.SEVERE, e.getMessage(), e);
 		}
 		
-		return null;
+		return ResponseEntity.ok(null);
 	}
 	
 	@Override
-	public ResponseEntity<Product> updateName(final ChangeNameCommand command) {
+	public ResponseEntity<String> updateName(final ChangeNameCommand command) {
 		try {
-			return woocommerceService.updateName(command);
+			woocommerceService.updateName(command);
 		} catch (final Exception e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 		}
 		
-		return null;
+		return moquiApi.updateName(command);
 	}
 	
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public ResponseEntity<Product> deleteProduct(final DeleteProductCommand command) {
+	public ResponseEntity<String> deleteProduct(final DeleteProductCommand command) {
 		try {
-			return woocommerceService.deleteProduct(command);
+			woocommerceService.deleteProduct(command);
 		} catch (final Exception e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 		}
 		
-		return null;
+		return moquiApi.deleteProduct(command);
 	}
 
 	protected Traverson createTraverson(final String url) {
