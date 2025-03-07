@@ -27,6 +27,9 @@ public class MoquiApiImpl implements MoquiApi {
 	@Value("${moqui.user}") private String moquiUser;
 	@Value("${moqui.pass}") private String moquiPass;
 	
+	@Value("${moqui.ignoreid:-1}") private String ignoreid;
+	@Value("${moqui.ignoreall:false}") private boolean ignoreall;
+	
 	@Autowired private RestTemplate restTemplate;
 	
 	private static String mapUom(final String uom) {
@@ -75,6 +78,11 @@ public class MoquiApiImpl implements MoquiApi {
 	@Override
 	public ResponseEntity<String> createProduct(CreateProductCommand command) {
 		final HttpHeaders headers = createHeaders();
+		
+		if (ignoreall)
+			return ResponseEntity.ok(null);
+		if (ignoreid != null && !ignoreid.isEmpty() && ignoreid.equals(command.getProductId().toString()))
+			return ResponseEntity.ok(null);
 
 		final Map<String, Object> jsonProductMap = Map.of("productId", command.getProductId(),
 				"productTypeEnumId", "PtAsset", "productName", command.getName(),
@@ -119,6 +127,11 @@ public class MoquiApiImpl implements MoquiApi {
 	@Override
 	public ResponseEntity<String> updateName(ChangeNameCommand command) {
 		final HttpHeaders headers = createHeaders();
+		
+		if (ignoreall)
+			return ResponseEntity.ok(null);
+		if (ignoreid != null && !ignoreid.isEmpty() && ignoreid.equals(command.getProductId().toString()))
+			return ResponseEntity.ok(null);
 
 		final Map<String, Object> jsonProductMap = Map.of("productId", command.getProductId(),
 				"productName", command.getName());
@@ -138,6 +151,11 @@ public class MoquiApiImpl implements MoquiApi {
 	@Override
 	public ResponseEntity<String> updatePrice(ChangePriceCommand command) {
 		final HttpHeaders headers = createHeaders();
+		
+		if (ignoreall)
+			return ResponseEntity.ok(null);
+		if (ignoreid != null && !ignoreid.isEmpty() && ignoreid.equals(command.getProductId().toString()))
+			return ResponseEntity.ok(null);
 
 		final String productPriceId = "leg"+command.getProductId();
 		final Map<String, Object> jsonPriceMap = Map.of("productId", command.getProductId(),
@@ -160,6 +178,11 @@ public class MoquiApiImpl implements MoquiApi {
 	@Override
 	public ResponseEntity<String> deleteProduct(DeleteProductCommand command) {
 		final HttpHeaders headers = createHeaders();
+		
+		if (ignoreall)
+			return ResponseEntity.ok(null);
+		if (ignoreid != null && !ignoreid.isEmpty() && ignoreid.equals(command.getProductId().toString()))
+			return ResponseEntity.ok(null);
 
 		try {
 			return restTemplate.exchange(
