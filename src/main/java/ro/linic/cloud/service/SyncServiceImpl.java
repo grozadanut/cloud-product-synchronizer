@@ -196,7 +196,7 @@ class SyncServiceImpl implements SyncService {
 	@Override
 	public ResponseEntity<Product> updateStock(final ChangeStockCommand changeStockCommand) {
 		try {
-			return woocommerceService.updateStock(changeStockCommand);
+			woocommerceService.updateStock(changeStockCommand);
 		} catch (final Exception e) {
 			log.log(Level.SEVERE, e.getMessage(), e);
 		}
