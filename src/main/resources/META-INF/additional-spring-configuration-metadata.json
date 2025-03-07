@@ -1,5 +1,17 @@
-{"properties": [{
-  "name": "cloud.notification.service.url",
-  "type": "java.lang.String",
-  "description": "The url where you can access the notification service"
-}]}
+{"properties": [
+  {
+    "name": "cloud.notification.service.url",
+    "type": "java.lang.String",
+    "description": "The url where you can access the notification service"
+  },
+  {
+    "name": "moqui.user",
+    "type": "java.lang.String",
+    "description": "Connects to moqui system using this user"
+  },
+  {
+    "name": "moqui.pass",
+    "type": "java.lang.String",
+    "description": "Connects to moqui system using this pass"
+  }
+]}
