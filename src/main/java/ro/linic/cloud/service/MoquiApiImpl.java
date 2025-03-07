@@ -114,7 +114,7 @@ public class MoquiApiImpl implements MoquiApi {
 				return idResponse;
 			
 			return restTemplate.exchange(
-					moquiUrl + "/rest/s1/mantle/products/" + command.getProductId() + "/prices/" + productPriceId, HttpMethod.PATCH,
+					moquiUrl + "/rest/s1/mantle/products/" + command.getProductId() + "/prices", HttpMethod.POST,
 					new HttpEntity<Map<String, Object>>(jsonPriceMap, headers),
 					String.class);
 		} catch (final Exception e) {
