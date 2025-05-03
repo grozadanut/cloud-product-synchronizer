@@ -92,11 +92,11 @@ public class MoquiApiImpl implements MoquiApi {
 		final Map<String, Object> jsonIdMap = Map.of("productId", command.getProductId(),
 				"productIdTypeEnumId", "PidtSku", "idValue", command.getBarcode());
 		
-		final String productPriceId = "leg"+command.getProductId();
-		final Map<String, Object> jsonPriceMap = Map.of("productId", command.getProductId(),
-				"productPriceId", productPriceId, "priceTypeEnumId", "PptList",
-				"pricePurposeEnumId", "PppPurchase", "priceUomId", "RON",
-				"price", command.getPricePerUom());
+//		final String productPriceId = "leg"+command.getProductId();
+//		final Map<String, Object> jsonPriceMap = Map.of("productId", command.getProductId(),
+//				"productPriceId", productPriceId, "priceTypeEnumId", "PptList",
+//				"pricePurposeEnumId", "PppPurchase", "priceUomId", "RON",
+//				"price", command.getPricePerUom());
 		
 		try {
 			final ResponseEntity<String> response = restTemplate.exchange(
@@ -106,16 +106,9 @@ public class MoquiApiImpl implements MoquiApi {
 			if (response.getStatusCode().isError())
 				return response;
 			
-			final ResponseEntity<String> idResponse = restTemplate.exchange(
+			return restTemplate.exchange(
 					moquiUrl + "/rest/s1/mantle/products/" + command.getProductId() + "/identifications", HttpMethod.POST,
 					new HttpEntity<Map<String, Object>>(jsonIdMap, headers),
-					String.class);
-			if (idResponse.getStatusCode().isError())
-				return idResponse;
-			
-			return restTemplate.exchange(
-					moquiUrl + "/rest/s1/mantle/products/" + command.getProductId() + "/prices", HttpMethod.POST,
-					new HttpEntity<Map<String, Object>>(jsonPriceMap, headers),
 					String.class);
 		} catch (final Exception e) {
 			log.severe("Failed createProduct Moqui invocation for: " + command);
@@ -150,29 +143,29 @@ public class MoquiApiImpl implements MoquiApi {
 	
 	@Override
 	public ResponseEntity<String> updatePrice(ChangePriceCommand command) {
-		final HttpHeaders headers = createHeaders();
+//		final HttpHeaders headers = createHeaders();
 		
-		if (ignoreall)
+//		if (ignoreall)
 			return ResponseEntity.ok(null);
-		if (ignoreid != null && !ignoreid.isEmpty() && ignoreid.equals(command.getProductId().toString()))
-			return ResponseEntity.ok(null);
-
-		final String productPriceId = "leg"+command.getProductId();
-		final Map<String, Object> jsonPriceMap = Map.of("productId", command.getProductId(),
-				"productPriceId", productPriceId, "priceTypeEnumId", "PptList",
-				"pricePurposeEnumId", "PppPurchase", "priceUomId", "RON",
-				"price", command.getPricePerUom());
-		
-		try {
-			return restTemplate.exchange(
-					moquiUrl + "/rest/s1/mantle/products/" + command.getProductId() + "/prices/" + productPriceId, HttpMethod.PATCH,
-					new HttpEntity<Map<String, Object>>(jsonPriceMap, headers),
-					String.class);
-		} catch (final Exception e) {
-			log.severe("Failed updatePrice Moqui invocation for: " + command);
-			log.log(Level.SEVERE, e.getMessage(), e);
-			return ResponseEntity.internalServerError().build();
-		}
+//		if (ignoreid != null && !ignoreid.isEmpty() && ignoreid.equals(command.getProductId().toString()))
+//			return ResponseEntity.ok(null);
+//
+//		final String productPriceId = "leg"+command.getProductId();
+//		final Map<String, Object> jsonPriceMap = Map.of("productId", command.getProductId(),
+//				"productPriceId", productPriceId, "priceTypeEnumId", "PptList",
+//				"pricePurposeEnumId", "PppPurchase", "priceUomId", "RON",
+//				"price", command.getPricePerUom());
+//		
+//		try {
+//			return restTemplate.exchange(
+//					moquiUrl + "/rest/s1/mantle/products/" + command.getProductId() + "/prices/" + productPriceId, HttpMethod.PATCH,
+//					new HttpEntity<Map<String, Object>>(jsonPriceMap, headers),
+//					String.class);
+//		} catch (final Exception e) {
+//			log.severe("Failed updatePrice Moqui invocation for: " + command);
+//			log.log(Level.SEVERE, e.getMessage(), e);
+//			return ResponseEntity.internalServerError().build();
+//		}
 	}
 	
 	@Override
